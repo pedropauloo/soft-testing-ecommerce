@@ -72,7 +72,8 @@ public class CompraService {
 	}
 
 	public BigDecimal calcularCustoTotal(CarrinhoDeCompras carrinho) {
-		// To-Do
-		return BigDecimal.ZERO;
-	}
+        return carrinho.getItens().stream()
+                .map(item -> item.getProduto().getPreco().multiply(BigDecimal.valueOf(item.getQuantidade())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }
