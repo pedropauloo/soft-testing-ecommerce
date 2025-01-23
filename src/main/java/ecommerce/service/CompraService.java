@@ -57,7 +57,7 @@ public class CompraService {
         BigDecimal frete = calcularFrete(pesoTotal, cliente);
         custoTotal = custoTotal.add(frete);
 
-			
+
 		PagamentoDTO pagamento = pagamentoExternal.autorizarPagamento(cliente.getId(), custoTotal.doubleValue());
 
 		if (!pagamento.autorizado()) {
@@ -108,7 +108,7 @@ public class CompraService {
         return pesoTotal;
     }
 
-	private BigDecimal calcularFrete(BigDecimal pesoTotal, Cliente cliente) {
+	public BigDecimal calcularFrete(BigDecimal pesoTotal, Cliente cliente) {
         BigDecimal frete = BigDecimal.ZERO;
 
         if (pesoTotal.compareTo(BigDecimal.valueOf(5)) <= 0) {
