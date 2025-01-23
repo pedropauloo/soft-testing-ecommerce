@@ -86,6 +86,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>1.17.4</version>
+				<configuration>
+					<mutators>ALL</mutators>
+					<targetClasses>br.ufrn.imd.*</targetClasses>
+					<targetTests>br.ufrn.imd.*Test</targetTests>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
