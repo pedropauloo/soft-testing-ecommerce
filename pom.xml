@@ -90,10 +90,17 @@
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
 				<version>1.17.4</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>1.2.1</version>
+					</dependency>
+				</dependencies>
 				<configuration>
 					<mutators>ALL</mutators>
-					<targetClasses>br.ufrn.imd.*</targetClasses>
-					<targetTests>br.ufrn.imd.*Test</targetTests>
+					<targetClasses>ecommerce.service.*</targetClasses>
+					<outputFormats>HTML</outputFormats>
 				</configuration>
 			</plugin>
 		</plugins>
