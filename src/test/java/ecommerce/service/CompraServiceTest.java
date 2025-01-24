@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -248,35 +249,116 @@ public class CompraServiceTest {
     }
 
     @Test
-    void testDesconto10PorcentoAcima500() {
-        BigDecimal precoProduto = BigDecimal.valueOf(600);
+    void testFreteClienteSemTipo() {
+        int peso = 10;
+
+        Cliente cliente = new Cliente();
+        cliente.setTipo(null);
+
         CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
         ItemCompra item = new ItemCompra();
-        item.setProduto(new Produto(1L, "Produto L", "Descrição L", precoProduto, 10, TipoProduto.ELETRONICO));
+        item.setProduto(new Produto(1L, "Produto L", "Descrição L", BigDecimal.valueOf(200), peso, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
+        BigDecimal frete = compraService.calcularFrete(pesoTotal, cliente);
+
+        assertEquals(DescontoFrete.QUATRO_POR_KG.getValor().multiply(BigDecimal.valueOf(peso)), frete);
+    }
+
+    @Test
+    void testSemDescontoAbaixo500() {
+        BigDecimal precoProduto = BigDecimal.valueOf(499);
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto M", "Descrição M", precoProduto, 5, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
+        BigDecimal custoComDesconto = compraService.aplicarDescontoCusto(custoProdutos);
+
+        assertEquals(BigDecimal.valueOf(499), custoComDesconto);
+    }
+
+    @Test
+    void testSemDescontoPara500() {
+        BigDecimal precoProduto = BigDecimal.valueOf(500);
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto N", "Descrição N", precoProduto, 5, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
+        BigDecimal custoComDesconto = compraService.aplicarDescontoCusto(custoProdutos);
+
+        assertEquals(BigDecimal.valueOf(500), custoComDesconto);
+    }
+
+    @Test
+    void testDesconto10PorcentoAcima500() {
+        BigDecimal precoProduto = BigDecimal.valueOf(501);
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto O", "Descrição O", precoProduto, 10, TipoProduto.ELETRONICO));
         item.setQuantidade(1L);
         carrinho.setItens(List.of(item));
 
         BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
 
-        BigDecimal desconto = compraService.aplicarDescontoCusto(custoProdutos);
+        BigDecimal custoComDesconto = compraService.aplicarDescontoCusto(custoProdutos);
 
-        assertEquals(DescontoCusto.DESCONTO_10.aplicar(precoProduto), desconto); // 10% de R$ 600
+        assertEquals(BigDecimal.valueOf(501 * 0.9).setScale(1, RoundingMode.HALF_UP), custoComDesconto);
+    }
+
+    @Test
+    void testDesconto10PorcentoAbaixo1000() {
+        BigDecimal precoProduto = BigDecimal.valueOf(999);
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto P", "Descrição P", precoProduto, 10, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
+
+        BigDecimal custoComDesconto = compraService.aplicarDescontoCusto(custoProdutos);
+
+        assertEquals(BigDecimal.valueOf(999 * 0.9), custoComDesconto);
+    }
+
+    @Test
+    void testDesconto10PorcentoPara1000() {
+        BigDecimal precoProduto = BigDecimal.valueOf(1000);
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto Q", "Descrição Q", precoProduto, 10, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
+
+        BigDecimal custoComDesconto = compraService.aplicarDescontoCusto(custoProdutos);
+
+        assertEquals(BigDecimal.valueOf(1000 * 0.9), custoComDesconto);
     }
 
     @Test
     void testDesconto20PorcentoAcima1000() {
-        BigDecimal precoProduto = BigDecimal.valueOf(1200);
+        BigDecimal precoProduto = BigDecimal.valueOf(1001);
         CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
         ItemCompra item = new ItemCompra();
-        item.setProduto(new Produto(1L, "Produto M", "Descrição M", precoProduto, 10, TipoProduto.ELETRONICO));
+        item.setProduto(new Produto(1L, "Produto R", "Descrição R", precoProduto, 10, TipoProduto.ELETRONICO));
         item.setQuantidade(1L);
         carrinho.setItens(List.of(item));
 
         BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
 
-        BigDecimal desconto = compraService.aplicarDescontoCusto(custoProdutos);
+        BigDecimal custoComDesconto = compraService.aplicarDescontoCusto(custoProdutos);
 
-        assertEquals(DescontoCusto.DESCONTO_20.aplicar(precoProduto), desconto); // 20% de R$ 1200
+        assertEquals(BigDecimal.valueOf(1001 * 0.8).setScale(1, RoundingMode.HALF_UP), custoComDesconto);
     }
 
     @Test
@@ -289,13 +371,30 @@ public class CompraServiceTest {
 
         CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
         ItemCompra item = new ItemCompra();
-        item.setProduto(new Produto(1L, "Produto N", "Descrição N", precoProduto, peso, TipoProduto.ELETRONICO));
+        item.setProduto(new Produto(1L, "Produto S", "Descrição S", precoProduto, peso, TipoProduto.ELETRONICO));
         item.setQuantidade(1L);
         carrinho.setItens(List.of(item));
 
         BigDecimal custoTotal = compraService.calcularCustoTotal(carrinho, cliente);
 
         assertEquals(precoProduto, custoTotal);
+    }
+
+
+    @Test
+    void testCarrinhoVazio() {
+        Cliente cliente = new Cliente();
+        cliente.setTipo(TipoCliente.BRONZE);
+
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+
+        BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
+        BigDecimal frete = compraService.calcularFrete(pesoTotal, cliente);
+        BigDecimal custoTotal = compraService.calcularCustoTotal(carrinho, cliente);
+
+        assertEquals(BigDecimal.ZERO, pesoTotal);
+        assertEquals(BigDecimal.ZERO, frete);
+        assertEquals(BigDecimal.ZERO, custoTotal);
     }
 
 
