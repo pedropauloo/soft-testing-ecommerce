@@ -246,4 +246,57 @@ public class CompraServiceTest {
 
         assertEquals(BigDecimal.ZERO, frete);
     }
+
+    @Test
+    void testDesconto10PorcentoAcima500() {
+        BigDecimal precoProduto = BigDecimal.valueOf(600);
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto L", "Descrição L", precoProduto, 10, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
+
+        BigDecimal desconto = compraService.aplicarDescontoCusto(custoProdutos);
+
+        assertEquals(DescontoCusto.DESCONTO_10.aplicar(precoProduto), desconto); // 10% de R$ 600
+    }
+
+    @Test
+    void testDesconto20PorcentoAcima1000() {
+        BigDecimal precoProduto = BigDecimal.valueOf(1200);
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto M", "Descrição M", precoProduto, 10, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal custoProdutos = compraService.calcularCustoProdutos(carrinho);
+
+        BigDecimal desconto = compraService.aplicarDescontoCusto(custoProdutos);
+
+        assertEquals(DescontoCusto.DESCONTO_20.aplicar(precoProduto), desconto); // 20% de R$ 1200
+    }
+
+    @Test
+    void testCalcularCustoTotal() {
+        BigDecimal precoProduto = BigDecimal.valueOf(100);
+        int peso = 1;
+
+        Cliente cliente = new Cliente();
+        cliente.setTipo(TipoCliente.BRONZE);
+
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto N", "Descrição N", precoProduto, peso, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal custoTotal = compraService.calcularCustoTotal(carrinho, cliente);
+
+        assertEquals(precoProduto, custoTotal);
+    }
+
+
 }

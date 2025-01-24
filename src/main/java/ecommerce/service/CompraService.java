@@ -52,13 +52,6 @@ public class CompraService {
 
         BigDecimal custoTotal = calcularCustoTotal(carrinho, cliente);
 
-        BigDecimal pesoTotal = calcularPesoTotal(carrinho);
-
-        BigDecimal frete = calcularFrete(pesoTotal, cliente);
-
-        custoTotal = custoTotal.add(frete);
-
-
         PagamentoDTO pagamento = pagamentoExternal.autorizarPagamento(cliente.getId(), custoTotal.doubleValue());
 
         if (!pagamento.autorizado()) {
@@ -77,7 +70,20 @@ public class CompraService {
         return compraDTO;
     }
 
+
     public BigDecimal calcularCustoTotal(CarrinhoDeCompras carrinho, Cliente cliente) {
+        BigDecimal custoProdutos = calcularCustoProdutos(carrinho);
+
+        BigDecimal custoProdutosComDesconto = aplicarDescontoCusto(custoProdutos);
+
+        BigDecimal pesoTotal = calcularPesoTotal(carrinho);
+
+        BigDecimal frete = calcularFrete(pesoTotal, cliente);
+
+        return custoProdutosComDesconto.add(frete);
+    }
+
+    public BigDecimal calcularCustoProdutos(CarrinhoDeCompras carrinho) {
         BigDecimal custoProdutos = BigDecimal.ZERO;
 
         for (ItemCompra item : carrinho.getItens()) {
@@ -87,10 +93,10 @@ public class CompraService {
 
         }
 
-        return aplicarDescontoCusto(custoProdutos);
+        return custoProdutos;
     }
 
-    private BigDecimal aplicarDescontoCusto(BigDecimal total) {
+    public BigDecimal aplicarDescontoCusto(BigDecimal total) {
         boolean custoMaiorQue1000 = total.compareTo(BigDecimal.valueOf(1000)) > 0;
         boolean custoMaiorQue500 = total.compareTo(BigDecimal.valueOf(500)) > 0;
 
