@@ -37,7 +37,7 @@ public class CompraServiceTest {
 
     @Test
     void testFreteAbaixo5kg() {
-        Integer peso = 4;
+        int peso = 4;
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
 
@@ -55,7 +55,7 @@ public class CompraServiceTest {
 
     @Test
     void testFretePara5kg() {
-        Integer peso = 5;
+        int peso = 5;
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
 
@@ -74,7 +74,7 @@ public class CompraServiceTest {
 
     @Test
     void testFreteAcima5kg() {
-        Integer peso = 6;
+        int peso = 6;
 
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
@@ -94,7 +94,7 @@ public class CompraServiceTest {
 
     @Test
     void testFreteAbaixo10kg() {
-        Integer peso = 9;
+        int peso = 9;
 
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
@@ -113,7 +113,7 @@ public class CompraServiceTest {
 
     @Test
     void testFretePara10kg() {
-        Integer peso = 10;
+        int peso = 10;
 
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
@@ -132,7 +132,7 @@ public class CompraServiceTest {
 
     @Test
     void testeFreteAcima10kg() {
-        Integer peso = 11;
+        int peso = 11;
 
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
@@ -151,7 +151,7 @@ public class CompraServiceTest {
 
     @Test
     void testFreteAbaixo50kg() {
-        Integer peso = 49;
+        int peso = 49;
 
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
@@ -170,7 +170,7 @@ public class CompraServiceTest {
 
     @Test
     void testFretePara50kg() {
-        Integer peso = 50;
+        int peso = 50;
 
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
@@ -189,7 +189,7 @@ public class CompraServiceTest {
 
     @Test
     void testFreteAcima50kg() {
-        Integer peso = 51;
+        int peso = 51;
 
         Cliente cliente = new Cliente();
         cliente.setTipo(TipoCliente.BRONZE);
@@ -206,5 +206,44 @@ public class CompraServiceTest {
         assertEquals(DescontoFrete.SETE_POR_KG.getValor().multiply(BigDecimal.valueOf(peso)), frete);
     }
 
+    @Test
+    void testFreteClientePrata() {
+        int peso = 51;
 
+        Cliente cliente = new Cliente();
+        cliente.setTipo(TipoCliente.PRATA);
+
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto J", "Descrição J", BigDecimal.valueOf(400), peso, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
+        BigDecimal frete = compraService.calcularFrete(pesoTotal, cliente);
+
+        BigDecimal valorFrete = DescontoFrete.SETE_POR_KG.getValor().multiply(BigDecimal.valueOf(peso));
+        BigDecimal freteCom50PorcentoDesconto = valorFrete.multiply(DescontoFrete.DESCONTO_50.getValor());
+
+        assertEquals(freteCom50PorcentoDesconto, frete);
+    }
+
+    @Test
+    void testFreteClienteOuro() {
+        int peso = 51;
+
+        Cliente cliente = new Cliente();
+        cliente.setTipo(TipoCliente.OURO);
+
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto K", "Descrição K", BigDecimal.valueOf(400), peso, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
+        BigDecimal frete = compraService.calcularFrete(pesoTotal, cliente);
+
+        assertEquals(BigDecimal.ZERO, frete);
+    }
 }
