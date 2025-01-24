@@ -111,7 +111,7 @@ public class CompraService {
         return frete;
     }
 
-    private BigDecimal calcularPesoTotal(CarrinhoDeCompras carrinho) {
+    public BigDecimal calcularPesoTotal(CarrinhoDeCompras carrinho) {
         BigDecimal pesoTotal = BigDecimal.ZERO;
 
         for (ItemCompra item : carrinho.getItens()) {
@@ -125,7 +125,9 @@ public class CompraService {
     }
 
     public BigDecimal calcularFrete(BigDecimal pesoTotal, Cliente cliente) {
-        if (cliente.getTipo() == TipoCliente.OURO || pesoTotal.compareTo(BigDecimal.valueOf(5)) <= 0) {
+        boolean pesoMenorIgual5 = pesoTotal.compareTo(BigDecimal.valueOf(5)) <= 0;
+
+        if (cliente.getTipo() == TipoCliente.OURO || pesoMenorIgual5) {
             return DescontoFrete.FRETE_GRATIS.getValor();
         }
 
