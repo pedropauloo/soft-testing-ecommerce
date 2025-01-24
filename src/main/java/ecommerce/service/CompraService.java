@@ -40,13 +40,7 @@ public class CompraService {
         Cliente cliente = clienteService.buscarPorId(clienteId);
         CarrinhoDeCompras carrinho = carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente);
 
-        if (carrinho == null) {
-            throw new IllegalStateException("Carrinho não encontrado.");
-        }
-
-        if (carrinho.getItens() == null || carrinho.getItens().isEmpty()) {
-            throw new IllegalStateException("Carrinho vazio."); 
-        }
+        validarCarrinho(carrinho);
 
         List<Long> produtosIds = carrinho.getItens().stream().map(i -> i.getProduto().getId())
                 .collect(Collectors.toList());
@@ -79,6 +73,14 @@ public class CompraService {
     }
 
 
+    private void validarCarrinho(CarrinhoDeCompras carrinho) {
+        if (carrinho == null) {
+            throw new IllegalStateException("Carrinho não encontrado.");
+        }
+        if (carrinho.getItens() == null || carrinho.getItens().isEmpty()) {
+            throw new IllegalStateException("Carrinho vazio.");
+        }
+    }
     public BigDecimal calcularCustoTotal(CarrinhoDeCompras carrinho, Cliente cliente) {
         BigDecimal custoProdutos = calcularCustoProdutos(carrinho);
 
