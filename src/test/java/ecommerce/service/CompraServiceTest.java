@@ -1,7 +1,14 @@
 package ecommerce.service;
 
+import ecommerce.dto.CompraDTO;
+import ecommerce.dto.DisponibilidadeDTO;
+import ecommerce.dto.EstoqueBaixaDTO;
+import ecommerce.dto.PagamentoDTO;
 import ecommerce.entity.*;
 import ecommerce.external.IEstoqueExternal;
+import ecommerce.external.IPagamentoExternal;
+import jakarta.persistence.EntityNotFoundException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -10,9 +17,14 @@ import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class CompraServiceTest {
 
@@ -26,7 +38,7 @@ public class CompraServiceTest {
     private IEstoqueExternal estoqueExternal;
 
     @Mock
-    private IEstoqueExternal pagamentoExternal;
+    private IPagamentoExternal pagamentoExternal;
 
     @InjectMocks
     private CompraService compraService;
@@ -380,22 +392,67 @@ public class CompraServiceTest {
         assertEquals(precoProduto, custoTotal);
     }
 
-
     @Test
-    void testCarrinhoVazio() {
+    void testFinalizarCompra_ClienteInexistente() {
+        Long carrinhoId = 1L;
+        Long clienteId = 999L; 
+        when(clienteService.buscarPorId(clienteId)).thenThrow(new EntityNotFoundException("Cliente não encontrado"));
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
+
+        assertEquals("Cliente não encontrado", exception.getMessage());
+    }
+    
+    @Test
+    void testFinalizarCompra_CarrinhoVazio() {
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+
         Cliente cliente = new Cliente();
+        cliente.setId(clienteId);
         cliente.setTipo(TipoCliente.BRONZE);
 
         CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        carrinho.setItens(List.of()); 
+        when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(carrinho);
 
-        BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
-        BigDecimal frete = compraService.calcularFrete(pesoTotal, cliente);
-        BigDecimal custoTotal = compraService.calcularCustoTotal(carrinho, cliente);
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
 
-        assertEquals(BigDecimal.ZERO, pesoTotal);
-        assertEquals(BigDecimal.ZERO, frete);
-        assertEquals(BigDecimal.ZERO, custoTotal);
+        assertEquals("Carrinho vazio.", exception.getMessage());     }
+
+    @Test
+    void testFinalizarCompra_VerificaDisponibilidade() {
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+
+        Cliente cliente = new Cliente();
+        cliente.setId(clienteId);
+        cliente.setTipo(TipoCliente.BRONZE);
+
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto I", "Descrição I", BigDecimal.valueOf(400), 1, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(carrinho);
+        
+                when(estoqueExternal.verificarDisponibilidade(any(), any())).thenReturn(new DisponibilidadeDTO(true, new ArrayList<>()));
+        
+                when(pagamentoExternal.autorizarPagamento(clienteId, BigDecimal.valueOf(400).doubleValue()))
+    .thenReturn(new PagamentoDTO(true, 1L)); 
+        
+                when(estoqueExternal.darBaixa(any(), any())).thenReturn(new EstoqueBaixaDTO(true));
+
+        CompraDTO resultado = compraService.finalizarCompra(carrinhoId, clienteId);
+
+        assertTrue(resultado.sucesso());
+        assertEquals(1, resultado.transacaoPagamentoId());
     }
-
-
 }

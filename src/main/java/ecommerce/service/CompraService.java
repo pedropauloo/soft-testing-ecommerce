@@ -40,6 +40,14 @@ public class CompraService {
         Cliente cliente = clienteService.buscarPorId(clienteId);
         CarrinhoDeCompras carrinho = carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente);
 
+        if (carrinho == null) {
+            throw new IllegalStateException("Carrinho não encontrado.");
+        }
+
+        if (carrinho.getItens() == null || carrinho.getItens().isEmpty()) {
+            throw new IllegalStateException("Carrinho vazio."); 
+        }
+
         List<Long> produtosIds = carrinho.getItens().stream().map(i -> i.getProduto().getId())
                 .collect(Collectors.toList());
         List<Long> produtosQtds = carrinho.getItens().stream().map(i -> i.getQuantidade()).collect(Collectors.toList());
