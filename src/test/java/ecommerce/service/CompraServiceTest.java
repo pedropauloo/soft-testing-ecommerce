@@ -546,4 +546,54 @@ public class CompraServiceTest {
         verify(pagamentoExternal).cancelarPagamento(clienteId, 1L);
     }
 
+    @Test
+    public void testFinalizarCompra_CarrinhoNulo() {
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+
+        Cliente cliente = new Cliente();
+        cliente.setId(clienteId);
+        
+        when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(null);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
+
+        assertEquals("Carrinho não encontrado.", exception.getMessage());
+    }
+
+    @Test
+    public void testFinalizarCompra_PagamentoNaoAutorizado() {
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+
+        Cliente cliente = new Cliente();
+        cliente.setId(clienteId);
+
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(new Produto(1L, "Produto I", "Descrição I", BigDecimal.valueOf(400), 1, TipoProduto.ELETRONICO));
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(carrinho);
+        
+        // Mock para verificar disponibilidade
+        when(estoqueExternal.verificarDisponibilidade(any(), any()))
+            .thenReturn(new DisponibilidadeDTO(true, new ArrayList<>()));
+
+        // Mock para autorizar pagamento
+        when(pagamentoExternal.autorizarPagamento(cliente.getId(), BigDecimal.valueOf(400).doubleValue()))
+            .thenReturn(new PagamentoDTO(false, null)); // Pagamento não autorizado
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
+
+        assertEquals("Pagamento não autorizado.", exception.getMessage());
+    }
+
 }
