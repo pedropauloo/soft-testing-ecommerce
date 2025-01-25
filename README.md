@@ -129,9 +129,9 @@ Se algum mutante não foi eliminado, segue abaixo a justificativa:
 
 ## 👥 Autores
 
-- Nome 1 - Matrícula
+- José Ben Hur Nascimento de Oliveira - 20240078121
 - Pedro Paulo Lucas de Lira - 20220043307
-- Nome 3 - Matrícula
+- Samuel de Araújo Costa - Matrícula
 
 ---
 
