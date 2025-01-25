@@ -21,6 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -743,5 +744,69 @@ public class CompraServiceTest {
         // Teste para peso positivo
         verifiquePesoProduto(5);
     }
+    @Test
+    void testFinalizarCompra_CarrinhoNulo() {
+        // Arrange
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+
+        when(clienteService.buscarPorId(clienteId)).thenReturn(new Cliente());
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(eq(carrinhoId), any())).thenReturn(null);
+        // Act & Assert
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
+
+        assertEquals("Carrinho não encontrado.", exception.getMessage());
+    }
+
+    @Test
+    void testFinalizarCompra_CarrinhoVazio() {
+        // Arrange
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+        Cliente cliente = new Cliente();
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        carrinho.setItens(new ArrayList<>()); // Carrinho vazio
+
+        when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(carrinho);
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
+
+        assertEquals("Carrinho vazio.", exception.getMessage());
+    }
+
+    @Test
+    void testFinalizarCompra_ItemForaDeEstoque() {
+        // Arrange
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+        Cliente cliente = new Cliente();
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        
+        // Adicionando um item ao carrinho
+        Produto produto = new Produto();
+        produto.setId(1L);
+        ItemCompra item = new ItemCompra();
+        item.setProduto(produto);
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(carrinho);
+        when(estoqueExternal.verificarDisponibilidade(any(), any())).thenReturn(new DisponibilidadeDTO(false, new ArrayList<>()));
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
+
+        assertEquals("Itens fora de estoque.", exception.getMessage());
+    }
 
 }
+

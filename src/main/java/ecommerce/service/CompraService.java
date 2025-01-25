@@ -24,9 +24,10 @@ public class CompraService {
     private final IEstoqueExternal estoqueExternal;
     private final IPagamentoExternal pagamentoExternal;
 
+
     @Autowired
     public CompraService(CarrinhoDeComprasService carrinhoService, ClienteService clienteService,
-            IEstoqueExternal estoqueExternal, IPagamentoExternal pagamentoExternal) {
+                         IEstoqueExternal estoqueExternal, IPagamentoExternal pagamentoExternal) {
         this.carrinhoService = carrinhoService;
         this.clienteService = clienteService;
 
@@ -79,7 +80,7 @@ public class CompraService {
             throw new IllegalStateException("Carrinho vazio.");
         }
     }
-
+    
     public BigDecimal calcularCustoTotal(CarrinhoDeCompras carrinho, Cliente cliente) {
         BigDecimal custoProdutos = calcularCustoProdutos(carrinho);
 
@@ -128,7 +129,7 @@ public class CompraService {
 
     public BigDecimal calcularPesoTotal(CarrinhoDeCompras carrinho) {
         BigDecimal pesoTotal = BigDecimal.ZERO;
-
+    
         for (ItemCompra item : carrinho.getItens()) {
             Produto produto = item.getProduto();
             if (produto != null) {
@@ -137,8 +138,7 @@ public class CompraService {
                     if (pesoProduto < 0) {
                         throw new IllegalStateException("Peso do produto não pode ser negativo.");
                     }
-                    pesoTotal = pesoTotal
-                            .add(BigDecimal.valueOf(pesoProduto).multiply(BigDecimal.valueOf(item.getQuantidade())));
+                    pesoTotal = pesoTotal.add(BigDecimal.valueOf(pesoProduto).multiply(BigDecimal.valueOf(item.getQuantidade())));
                 } else {
                     throw new IllegalStateException("Peso do produto não pode ser nulo.");
                 }
@@ -146,7 +146,7 @@ public class CompraService {
                 throw new IllegalStateException("Produto não pode ser nulo.");
             }
         }
-
+    
         return pesoTotal;
     }
 
