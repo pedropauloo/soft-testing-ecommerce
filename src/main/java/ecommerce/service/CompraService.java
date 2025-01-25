@@ -24,10 +24,9 @@ public class CompraService {
     private final IEstoqueExternal estoqueExternal;
     private final IPagamentoExternal pagamentoExternal;
 
-
     @Autowired
     public CompraService(CarrinhoDeComprasService carrinhoService, ClienteService clienteService,
-                         IEstoqueExternal estoqueExternal, IPagamentoExternal pagamentoExternal) {
+            IEstoqueExternal estoqueExternal, IPagamentoExternal pagamentoExternal) {
         this.carrinhoService = carrinhoService;
         this.clienteService = clienteService;
 
@@ -72,12 +71,10 @@ public class CompraService {
         return compraDTO;
     }
 
-
     private void validarCarrinho(CarrinhoDeCompras carrinho) {
         if (carrinho == null) {
             throw new IllegalStateException("Carrinho não encontrado.");
         }
-
         if (carrinho.getItens() == null || carrinho.getItens().isEmpty()) {
             throw new IllegalStateException("Carrinho vazio.");
         }
@@ -133,10 +130,21 @@ public class CompraService {
         BigDecimal pesoTotal = BigDecimal.ZERO;
 
         for (ItemCompra item : carrinho.getItens()) {
-            Integer pesoProduto = item.getProduto().getPeso();
-            Long quantidade = item.getQuantidade();
-
-            pesoTotal = BigDecimal.valueOf(pesoProduto).multiply(BigDecimal.valueOf(quantidade));
+            Produto produto = item.getProduto();
+            if (produto != null) {
+                Integer pesoProduto = produto.getPeso(); // Supondo que getPeso() retorna um Integer
+                if (pesoProduto != null) {
+                    if (pesoProduto < 0) {
+                        throw new IllegalStateException("Peso do produto não pode ser negativo.");
+                    }
+                    pesoTotal = pesoTotal
+                            .add(BigDecimal.valueOf(pesoProduto).multiply(BigDecimal.valueOf(item.getQuantidade())));
+                } else {
+                    throw new IllegalStateException("Peso do produto não pode ser nulo.");
+                }
+            } else {
+                throw new IllegalStateException("Produto não pode ser nulo.");
+            }
         }
 
         return pesoTotal;

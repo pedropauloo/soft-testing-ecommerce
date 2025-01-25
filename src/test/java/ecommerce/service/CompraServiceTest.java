@@ -586,4 +586,162 @@ public class CompraServiceTest {
         assertEquals("Carrinho não encontrado.", exception.getMessage());
     }
 
+    @Test
+    void testCalcularPesoTotal() {
+        // Arrange
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        Produto produto1 = new Produto();
+        produto1.setPeso(10); // Defina o peso
+        ItemCompra item1 = new ItemCompra();
+        item1.setProduto(produto1);
+        item1.setQuantidade(1L);
+    
+        Produto produto2 = new Produto();
+        produto2.setPeso(5); // Defina o peso
+        ItemCompra item2 = new ItemCompra();
+        item2.setProduto(produto2);
+        item2.setQuantidade(2L);
+    
+        carrinho.setItens(List.of(item1, item2)); // Adicione os itens ao carrinho
+    
+        // Act
+        BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
+    
+        // Assert
+        assertEquals(BigDecimal.valueOf(20), pesoTotal); // 10 + 5*2 = 20
+    }
+
+    @Test
+    void testCalcularCustoTotal_ValoresNormais() {
+        // Arrange
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        Cliente cliente = new Cliente();
+        
+
+        // Defina os itens do carrinho e outros necessários
+        // Exemplo:
+        Produto produto = new Produto();
+        produto.setPeso(2);
+        produto.setPreco(BigDecimal.valueOf(50)); // Definindo preço do produto
+        ItemCompra item = new ItemCompra();
+        item.setProduto(produto);
+        item.setQuantidade(2L);
+        carrinho.setItens(List.of(item)); // Adicionando item ao carrinho
+
+        // Act
+        BigDecimal resultado = compraService.calcularCustoTotal(carrinho, cliente);
+
+        // Assert
+        assertEquals(BigDecimal.valueOf(100), resultado); // Exemplo de resultado esperado
+    }
+
+    @Test
+    void testCalcularPesoTotal_PesoNegativo() {
+        // Arrange
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        Produto produto = new Produto();
+        produto.setPeso(-1); // Peso negativo
+        ItemCompra item = new ItemCompra();
+        item.setProduto(produto);
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+    
+        // Act & Assert
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.calcularPesoTotal(carrinho);
+        });
+    
+        assertEquals("Peso do produto não pode ser negativo.", exception.getMessage());
+    }
+
+    
+
+    @Test
+    void testCalcularPesoTotal_PesoNulo() {
+        // Arrange
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        Produto produto = new Produto();
+        produto.setPeso(null); // Peso nulo
+        ItemCompra item = new ItemCompra();
+        item.setProduto(produto);
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.calcularPesoTotal(carrinho);
+        });
+
+        assertEquals("Peso do produto não pode ser nulo.", exception.getMessage());
+    }
+
+    
+    @Test
+    void testCalcularPesoTotal_ProdutoNulo() {
+        // Arrange
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        ItemCompra item = new ItemCompra();
+        item.setProduto(null); // Produto nulo
+        item.setQuantidade(1L);
+        carrinho.setItens(List.of(item));
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.calcularPesoTotal(carrinho);
+        });
+
+        assertEquals("Produto não pode ser nulo.", exception.getMessage());
+    }
+    @Test
+    void testCalcularPesoTotal_PesoValido() {
+        // Arrange
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        Produto produto = new Produto();
+        produto.setPeso(5); // Peso válido
+        ItemCompra item = new ItemCompra();
+        item.setProduto(produto);
+        item.setQuantidade(2L); // 2 itens
+        carrinho.setItens(List.of(item));
+
+        // Act
+        BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
+
+        // Assert
+        assertEquals(BigDecimal.valueOf(10), pesoTotal); // 5 * 2
+    }
+
+    private void verifiquePesoProduto(int peso) {
+        // Arrange
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        Produto produto = new Produto();
+        produto.setPeso(peso); // Peso variável baseado no teste
+        ItemCompra item = new ItemCompra();
+        item.setProduto(produto);
+        item.setQuantidade(1L); // Apenas 1 item
+        carrinho.setItens(List.of(item));
+    
+        if (peso < 0) {
+            // Act & Assert para peso negativo
+            Exception exception = assertThrows(IllegalStateException.class, () -> {
+                compraService.calcularPesoTotal(carrinho);
+            });
+            assertEquals("Peso do produto não pode ser negativo.", exception.getMessage());
+        } else {
+            // Act para peso zero ou positivo
+            BigDecimal pesoTotal = compraService.calcularPesoTotal(carrinho);
+            assertEquals(BigDecimal.valueOf(peso), pesoTotal);
+        }
+    }
+    @Test
+    void testCalcularPesoTotal_PesoLimite() {
+        // Teste para peso negativo
+        verifiquePesoProduto(-1);
+
+        // Teste para peso zero
+        verifiquePesoProduto(0);
+
+        // Teste para peso positivo
+        verifiquePesoProduto(5);
+    }
+
 }
