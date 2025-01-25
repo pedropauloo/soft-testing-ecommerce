@@ -391,7 +391,7 @@ public class CompraServiceTest {
     }
 
     @Test
-    void testFinalizarCompra_ClienteInexistente() {
+    void testFinalizarCompraClienteInexistente() {
         Long carrinhoId = 1L;
         Long clienteId = 999L;
         when(clienteService.buscarPorId(clienteId)).thenThrow(new EntityNotFoundException("Cliente não encontrado"));
@@ -569,7 +569,7 @@ public class CompraServiceTest {
     }
 
     @Test
-    public void testFinalizarCompraCarrinhoNulo() {
+    void testFinalizarCompraCarrinhoNulo() {
         Long carrinhoId = 1L;
         Long clienteId = 1L;
 
