@@ -404,7 +404,7 @@ public class CompraServiceTest {
     }
 
     @Test
-    void testFinalizarCompra_CarrinhoVazio() {
+    void testFinalizarCompraCarrinhoVazio() {
         Long carrinhoId = 1L;
         Long clienteId = 1L;
 
@@ -414,6 +414,28 @@ public class CompraServiceTest {
 
         CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
         carrinho.setItens(List.of());
+        when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
+        when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(carrinho);
+
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            compraService.finalizarCompra(carrinhoId, clienteId);
+        });
+
+        assertEquals("Carrinho vazio.", exception.getMessage());
+    }
+
+    @Test
+    void testFinalizaCompraCarrinhoItensNulo() {
+        Long carrinhoId = 1L;
+        Long clienteId = 1L;
+
+        Cliente cliente = new Cliente();
+        cliente.setId(clienteId);
+        cliente.setTipo(TipoCliente.BRONZE);
+
+        CarrinhoDeCompras carrinho = new CarrinhoDeCompras();
+        carrinho.setItens(null);
+
         when(clienteService.buscarPorId(clienteId)).thenReturn(cliente);
         when(carrinhoService.buscarPorCarrinhoIdEClienteId(carrinhoId, cliente)).thenReturn(carrinho);
 

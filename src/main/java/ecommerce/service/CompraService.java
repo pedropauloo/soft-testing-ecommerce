@@ -77,10 +77,12 @@ public class CompraService {
         if (carrinho == null) {
             throw new IllegalStateException("Carrinho não encontrado.");
         }
+
         if (carrinho.getItens() == null || carrinho.getItens().isEmpty()) {
             throw new IllegalStateException("Carrinho vazio.");
         }
     }
+
     public BigDecimal calcularCustoTotal(CarrinhoDeCompras carrinho, Cliente cliente) {
         BigDecimal custoProdutos = calcularCustoProdutos(carrinho);
 
