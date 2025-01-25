@@ -32,9 +32,9 @@ Os testes estão localizados em:
 
 Certifique-se de ter as seguintes ferramentas instaladas:
 
-- **☕ Java**: Versão 8 ou superior  
+- **☕ Java**: Versão 8 ou superior
   - Verifique a versão com o comando: `java -version`
-- **🐍 Maven**: Gerenciador de dependências  
+- **🐍 Maven**: Gerenciador de dependências
   - Verifique a versão com o comando: `mvn -v`
 - **🧪 JUnit 5**: Framework de testes automatizados
 - **🧬 PIT**: Ferramenta de testes de mutação
@@ -130,7 +130,7 @@ Se algum mutante não foi eliminado, segue abaixo a justificativa:
 ## 👥 Autores
 
 - Nome 1 - Matrícula
-- Nome 2 - Matrícula
+- Pedro Paulo Lucas de Lira - 20220043307
 - Nome 3 - Matrícula
 
 ---
@@ -138,4 +138,3 @@ Se algum mutante não foi eliminado, segue abaixo a justificativa:
 ## 📜 Licença
 
 Este projeto foi desenvolvido para fins acadêmicos e não possui licença oficial.
-
