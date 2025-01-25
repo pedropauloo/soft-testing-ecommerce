@@ -46,13 +46,13 @@ Certifique-se de ter as seguintes ferramentas instaladas:
 1. Clone o repositório para sua máquina local:
 
    ```bash
-   git clone <url-do-repositorio>
+   git clone https://github.com/pedropauloo/soft-testing-ecommerce.git
    ```
 
 2. Navegue até a pasta do projeto:
 
    ```bash
-   cd nome-do-projeto
+   cd soft-testing-ecommerce
    ```
 
 3. Compile o projeto utilizando o Maven:
@@ -107,23 +107,6 @@ Abra o arquivo HTML no navegador para visualizar a cobertura detalhada.
    ```
    target/pit-reports/index.html
    ```
-3. Abra o arquivo HTML no navegador para verificar:
-   - Quantos mutantes foram gerados.
-   - Quantos foram mortos.
-   - Quais sobreviveram.
-
----
-
-## ☠️ Mutantes Não Mortos
-
-Se algum mutante não foi eliminado, segue abaixo a justificativa:
-
-1. **Mutante X (Exemplo)**:
-
-   - **Descrição**: Substituição de operador `+` por `-` na classe `CompraService`.
-   - **Justificativa**: Este mutante altera o comportamento de um cenário não previsto para o escopo do trabalho.
-
-2. (Repita para cada mutante, se aplicável).
 
 ---
 
